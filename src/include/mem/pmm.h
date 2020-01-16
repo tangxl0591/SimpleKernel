@@ -45,19 +45,19 @@ extern "C" {
 
 #define PMM_PAGE_MAX_SIZE (PMM_MAX_SIZE / PMM_PAGE_SIZE)// 物理页数量 131072, 0x20000
 
-extern ptr_t kernel_init_start[];
-extern ptr_t kernel_init_text_start[];
-extern ptr_t kernel_init_text_end[];
-extern ptr_t kernel_init_data_start[];
-extern ptr_t kernel_init_data_end[];
-extern ptr_t kernel_init_end[];
+extern ptr_t * kernel_init_start;
+extern ptr_t * kernel_init_text_start;
+extern ptr_t * kernel_init_text_end;
+extern ptr_t * kernel_init_data_start;
+extern ptr_t * kernel_init_data_end;
+extern ptr_t * kernel_init_end;
 
-extern ptr_t kernel_start[];
-extern ptr_t kernel_text_start[];
-extern ptr_t kernel_text_end[];
-extern ptr_t kernel_data_start[];
-extern ptr_t kernel_data_end[];
-extern ptr_t kernel_end[];
+extern ptr_t * kernel_start;
+extern ptr_t * kernel_text_start;
+extern ptr_t * kernel_text_end;
+extern ptr_t * kernel_data_start;
+extern ptr_t * kernel_data_end;
+extern ptr_t * kernel_end;
 
 // 开启分页机制之后的内核栈
 extern uint8_t kernel_stack[STACK_SIZE];

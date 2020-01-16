@@ -22,6 +22,7 @@ void kernel_main(ptr_t magic, ptr_t addr) {
 	debug_init(magic, addr);
 	pmm_init();
 	vmm_init();
+	heap_init();
 
 	showinfo();
 	test();
