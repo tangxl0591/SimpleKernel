@@ -9,6 +9,7 @@ extern "C" {
 
 #include "include/kernel.h"
 #include "../test/include/test.h"
+#include "debug.h"
 
 // 内核入口
 // 指针是 32 位的

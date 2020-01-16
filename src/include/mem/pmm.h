@@ -45,6 +45,14 @@ extern "C" {
 
 #define PMM_PAGE_MAX_SIZE (PMM_MAX_SIZE / PMM_PAGE_SIZE)// 物理页数量 131072, 0x20000
 
+// A common problem is getting garbage data when trying to use a value defined in a linker script.
+// This is usually because they're dereferencing the symbol. A symbol defined in a linker script (e.g. _ebss = .;)
+// is only a symbol, not a variable. If you access the symbol using extern uint32_t _ebss;
+// and then try to use _ebss the code will try to read a 32-bit integer from the address indicated by _ebss.
+// The solution to this is to take the address of _ebss either by using it as & _ebss or by defining it as
+// an unsized array(extern char _ebss[]; ) and casting to an integer.(The array notation prevents accidental
+// reads from _ebss as arrays must be explicitly dereferenced)
+// ref: http://wiki.osdev.org/Using_Linker_Script_Values
 extern ptr_t * kernel_init_start;
 extern ptr_t * kernel_init_text_start;
 extern ptr_t * kernel_init_text_end;
@@ -70,7 +78,7 @@ extern multiboot_mmap_tag_t * mmap_tag;
 // 初始化内存管理
 void pmm_init(void);
 
-ptr_t pmm_alloc(uint32_t byte);
+ptr_t pmm_alloc(size_t byte);
 
 void pmm_free_page(ptr_t page);
 

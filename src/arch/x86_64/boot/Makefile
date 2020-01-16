@@ -28,7 +28,7 @@ all: $(SUB_DIR)
     done
 	@# $(MAKE) info
 	@$(MAKE) boot.o
-	# @$(MAKE) bootinit.o
+	@# $(MAKE) bootinit.o
 	@$(MAKE) $(patsubst %.c, %.o, $(wildcard *.c))
 	@echo Leave $(CURR_DIR)
 

@@ -24,6 +24,7 @@ bool test_pmm(void);
 bool test_vmm(void);
 bool test_libc(void);
 bool test_heap(void);
+bool test_task(void);
 
 #ifdef __cplusplus
 }
