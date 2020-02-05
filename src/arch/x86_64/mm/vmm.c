@@ -39,8 +39,16 @@ void vmm_init(void) {
 	for(uint32_t i = pgd_idx, j = 0 ; i < VMM_PAGE_DIRECTORIES_KERNEL + pgd_idx ; i++, j++) {
 		pgd_kernel[i] = ( (ptr_t)vmm_la_to_pa( (ptr_t)pte_kernel[j]) | VMM_PAGE_PRESENT | VMM_PAGE_RW);
 	}
+<<<<<<< HEAD
+=======
+
+	// 将每个页表项赋值
+	// 映射 kernel 段 4MB
+	// 映射虚拟地址 0xC0000000-0xC0400000 到物理地址 0x00000000-0x00400000
+>>>>>>> vmm_and_pmm
 	ptr_t * pte = (ptr_t *)pte_kernel;
 	for(uint32_t i = 0 ; i < VMM_PAGE_TABLES_KERNEL * VMM_PAGES_PRE_PAGE_TABLE ; i++) {
+		// 物理地址由 (i << 12) 给出
 		pte[i] = (i << 12) | VMM_PAGE_PRESENT | VMM_PAGE_RW;
 	}
 
@@ -54,6 +62,7 @@ void vmm_init(void) {
 void map(pgd_t * pgd_now, ptr_t va, ptr_t pa, uint32_t flags) {
 	uint32_t pgd_idx = VMM_PGD_INDEX(va);// 0x200
 	uint32_t pte_idx = VMM_PTE_INDEX(va);// 0x0
+<<<<<<< HEAD
 	// printk_debug("pgd_now = %X\n", pgd_now);
 	// printk_debug("pgd_idx = %X\n", pgd_idx);
 	// printk_debug("pte_idx = %X\n", pte_idx);
@@ -73,6 +82,27 @@ void map(pgd_t * pgd_now, ptr_t va, ptr_t pa, uint32_t flags) {
 
 	pte[pte_idx] = (pa & VMM_PAGE_MASK) | flags;
 	// printk_debug("pte[pte_idx] = %X\n", pte[pte_idx]);
+=======
+	printk_debug("pgd_now = %X\n", pgd_now);
+	printk_debug("pgd_idx = %X\n", pgd_idx);
+	printk_debug("pte_idx = %X\n", pte_idx);
+	pte_t * pte = (pte_t *)(pgd_now[pgd_idx] & VMM_PAGE_MASK);
+	printk_debug("pte1 = %X\n", pte);
+	// 转换到内核线性地址
+	if(pte != NULL) {
+		printk_debug("pte20 = %X\n", pte);
+		pte = (pte_t *)vmm_pa_to_la( (ptr_t)pte);
+		printk_debug("pte21 = %X\n", pte);
+	} else {
+		pte = (pte_t *)vmm_pa_to_la( (ptr_t)pte);
+		printk_debug("pte2 = %X\n", pte);
+		pgd_now[pgd_idx] = (uint32_t)pte | flags;
+		printk_debug("pgd_now[pgd_idx] = %X\n", pgd_now[pgd_idx]);
+	}
+
+	pte[pte_idx] = (pa & VMM_PAGE_MASK) | flags;
+	printk_debug("pte[pte_idx] = %X\n", pte[pte_idx]);
+>>>>>>> vmm_and_pmm
 	// // 通知 CPU 更新页表缓存
 	CPU_INVLPG(va);
 	return;

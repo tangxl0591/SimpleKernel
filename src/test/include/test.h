@@ -23,6 +23,11 @@ bool test(void);
 bool test_pmm(void);
 bool test_vmm(void);
 bool test_libc(void);
+<<<<<<< HEAD
+=======
+bool test_heap(void);
+bool test_task(void);
+>>>>>>> vmm_and_pmm
 
 #ifdef __cplusplus
 }

@@ -97,8 +97,11 @@ void pmm_mamage_init(e820map_t * e820map);
 void pmm_init(void);
 
 ptr_t pmm_alloc(size_t byte);
+<<<<<<< HEAD
 
 void pmm_free_page(ptr_t addr, uint32_t byte);
+=======
+>>>>>>> vmm_and_pmm
 
 uint32_t pmm_free_pages_count(void);
 

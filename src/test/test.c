@@ -8,6 +8,10 @@ extern "C" {
 #endif
 
 #include "include/test.h"
+<<<<<<< HEAD
+=======
+#include "heap/heap.h"
+>>>>>>> vmm_and_pmm
 
 bool test_pmm(void) {
 	ptr_t allc_addr = 0;
@@ -36,6 +40,30 @@ bool test_libc() {
 	return true;
 }
 
+<<<<<<< HEAD
+=======
+bool test_heap() {
+	printk_test("Test Heap kmalloc :\n");
+	ptr_t allc_addr1 = (ptr_t)kmalloc(9000);
+	printk_test("Alloc Physical Addr: 0x%08X\n", allc_addr1);
+	ptr_t allc_addr2 = (ptr_t)kmalloc(1);
+	printk_test("Alloc Physical Addr: 0x%08X\n", allc_addr2);
+	ptr_t allc_addr3 = (ptr_t)kmalloc(1);
+	printk_test("Alloc Physical Addr: 0x%08X\n", allc_addr3);
+	ptr_t allc_addr4 = (ptr_t)kmalloc(1);
+	printk_test("Alloc Physical Addr: 0x%08X\n", allc_addr4);
+	printk_test("Test Heap kfree :\n");
+	kfree( (ptr_t)allc_addr1);
+	kfree( (ptr_t)allc_addr2);
+	kfree( (ptr_t)allc_addr3);
+	kfree( (ptr_t)allc_addr4);
+	ptr_t new_addr = (ptr_t)kmalloc(9000);
+	printk_test("New Alloc Physical Addr: 0x%08X\n", new_addr);
+
+	return true;
+}
+
+>>>>>>> vmm_and_pmm
 bool test(void) {
 	test_pmm();
 	test_vmm();

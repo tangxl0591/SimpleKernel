@@ -284,7 +284,11 @@ static inline bool EFLAGS_CF_status(void) {
 }
 
 static inline void CPU_INVLPG(ptr_t addr) {
+<<<<<<< HEAD
 	__asm__ volatile ("invlpg (%0)" : : "r" (addr) : "memory");
+=======
+	__asm__ volatile ( "invlpg (%0)" : : "r" ( addr ) : "memory" );
+>>>>>>> vmm_and_pmm
 	return;
 }
 
