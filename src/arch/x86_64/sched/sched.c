@@ -88,7 +88,6 @@ void schedule() {
 			// printk_debug("switch_to END.\n");
 			// asm ("hlt");
 		}
-
 	}
 	local_intr_restore(intr_flag);
 	return;

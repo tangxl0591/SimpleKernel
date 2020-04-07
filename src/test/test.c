@@ -47,21 +47,21 @@ bool test_libc(void) {
 	return true;
 }
 
-static int32_t thread2(void * arg __UNUSED__) {
+int32_t test_thread2(void * arg __UNUSED__) {
 	for(int i = 0 ; i < 100 ; i++) {
 		printk("2");
 	}
 	return 2;
 }
 
-static int32_t thread3(void * arg __UNUSED__) {
+int32_t test_thread3(void * arg __UNUSED__) {
 	for(int i = 0 ; i < 100 ; i++) {
 		printk("3");
 	}
 	return 3;
 }
 
-static int32_t thread4(void * arg __UNUSED__) {
+int32_t test_thread4(void * arg __UNUSED__) {
 	for(int i = 0 ; i < 100 ; i++) {
 		printk("4");
 	}
@@ -69,9 +69,9 @@ static int32_t thread4(void * arg __UNUSED__) {
 }
 
 bool test_task(void) {
-	pid_t pid1 = kernel_thread(thread2, NULL, 0);
-	pid_t pid2 = kernel_thread(thread3, NULL, 0);
-	pid_t pid3 = kernel_thread(thread4, NULL, 0);
+	pid_t pid1 = kernel_thread(test_thread2, NULL, 0);
+	pid_t pid2 = kernel_thread(test_thread3, NULL, 0);
+	pid_t pid3 = kernel_thread(test_thread4, NULL, 0);
 
 	set_task_name(pid1, "test1");
 	set_task_name(pid2, "test2");

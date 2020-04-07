@@ -148,7 +148,8 @@ pid_t do_fork(uint32_t flags __UNUSED__, pt_regs_t * pt_regs) {
 }
 
 void do_exit(int32_t exit_code) {
-	printk_debug("do_exit\n");
+	cpu_cli();
+	printk_debug("do_exit pid: 0x%08X\n", get_current_task()->pid);
 	get_current_task()->status = TASK_ZOMBIE;
 	get_current_task()->exit_code = exit_code;
 	curr_pid--;
@@ -311,6 +312,7 @@ void show_task(pid_t pid) {
 	else {
 		task = get_task(pid);
 		if(task != NULL) {
+			printk("task: 0x%08X\t", task);
 			printk("pid: 0x%08X\t", task->pid);
 			printk("name: %s\t", task->name);
 			printk("status: 0x%08X\t", task->status);
@@ -330,6 +332,7 @@ void show_task(pid_t pid) {
 // 显示目前运行进程信息
 void show_curr_task(void) {
 	task_pcb_t * task = get_current_task();
+	printk("task: 0x%08X\t", task);
 	printk("pid: 0x%08X\t", task->pid);
 	printk("name: %s\t", task->name);
 	printk("status: 0x%08X\t", task->status);

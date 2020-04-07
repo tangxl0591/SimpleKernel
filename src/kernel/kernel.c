@@ -43,12 +43,18 @@ void kernel_main(ptr_t magic, ptr_t addr) {
 		// 任务初始化
 		task_init();
 		// 调度初始化
-		// sched_init();
+		sched_init();
 
 		// showinfo();
-		test();
+		// test();
+
+		pid_t pid1 = kernel_thread(test_thread2, NULL, 0);
+		pid_t pid2 = kernel_thread(test_thread3, NULL, 0);
+		pid_t pid3 = kernel_thread(test_thread4, NULL, 0);
 	}
 	local_intr_restore(intr_flag);
+	// 确保允许中断
+	cpu_sti();
 
 	for(int i = 0 ; i < 100 ; i++) {
 		printk("8");
