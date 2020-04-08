@@ -43,20 +43,20 @@ void clock_handler(pt_regs_t * regs);
 		"1:\n\t" \
 		"popl %%ebp\n\t" \
 		"popfl\n" \
-		:[prev_sp] "=m" (prev->context->esp), \
-		[prev_ip] "=m" (prev->context->eip), \
+		:[prev_sp] "=m" ( (prev)->context->esp), \
+		[prev_ip] "=m" ( (prev)->context->eip), \
 		"=a" (last), \
 		"=b" (ebx), "=c" (ecx), "=d" (edx), \
 		"=S" (esi), "=D" (edi) \
-		:[next_sp]  "m" (next->context->esp), \
-		[next_ip]  "m" (next->context->eip), \
+		:[next_sp]  "m" ( (next)->context->esp), \
+		[next_ip]  "m" ( (next)->context->eip), \
 		[prev]     "a" (prev), \
 		[next]     "d" (next) \
 		: "memory"); \
-	} while(0);
+	} while(0)
 
- #ifdef __cplusplus
+#ifdef __cplusplus
 }
- #endif
+#endif
 
  #endif /* _SCHED_H_ */

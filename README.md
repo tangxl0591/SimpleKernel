@@ -154,6 +154,20 @@ simplekernel.img 是 1.44 软盘，我们的内核就在这里。
 
 [c-algorithms](https://github.com/fragglet/c-algorithms)
 
+[Linux内核中的中断栈与内核栈的补充说明](http://blog.chinaunix.net/uid-23769728-id-3077874.html)
+
+[Linux进程管理 (1)进程的诞生](https://www.cnblogs.com/arnoldlu/p/8466928.html)
+
+
+
+
+
+
+
+
+
+
+
 ## 支持作者
 
 请我喝杯咖啡吧！

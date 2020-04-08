@@ -98,7 +98,7 @@ isr_common_stub:
     // 清除压入的参数
     add $0x04, %esp
     // 恢复上下文
-    call forkret_s
+    call intr_restore
 
 # 构造中断请求的宏
 .macro IRQ name, no
@@ -149,10 +149,11 @@ irq_common_stub:
     call irq_handler
     # 清除压入的参数
     add $0x04, %esp
-    jmp forkret_s
+    jmp intr_restore
 
-.global forkret_s
-forkret_s:
+// 从中断恢复现场
+.global intr_restore
+intr_restore:
     pop %gs
     pop %fs
     pop %es
@@ -164,11 +165,18 @@ forkret_s:
     # 出栈 EIP, CS, EFLAGS, ESP, SS
     iret
 
+str:
+    .ascii "forkret_s233\n\0"
+
 .global forkret_s233
 .extern print_stack
 .extern print_curr
 .extern print_next
 forkret_s233:
+    push $str
+    call printk_debug
+    add $0x04, %esp
+
     pop %gs
     pop %fs
     pop %es
@@ -178,6 +186,4 @@ forkret_s233:
     # 清理压栈的 错误代码 和 ISR 编号
     add $0x08, %esp
     # 出栈 EIP, CS, EFLAGS, ESP, SS
-    // push $10
-    // call print_stack
     iret

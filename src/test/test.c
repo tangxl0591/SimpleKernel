@@ -51,6 +51,7 @@ int32_t test_thread2(void * arg __UNUSED__) {
 	for(int i = 0 ; i < 100 ; i++) {
 		printk("2");
 	}
+	printk("\n");
 	return 2;
 }
 
@@ -58,6 +59,7 @@ int32_t test_thread3(void * arg __UNUSED__) {
 	for(int i = 0 ; i < 100 ; i++) {
 		printk("3");
 	}
+	printk("\n");
 	return 3;
 }
 
@@ -65,23 +67,40 @@ int32_t test_thread4(void * arg __UNUSED__) {
 	for(int i = 0 ; i < 100 ; i++) {
 		printk("4");
 	}
+	printk("\n");
 	return 4;
 }
 
 bool test_task(void) {
 	pid_t pid1 = kernel_thread(test_thread2, NULL, 0);
+	printk_debug("kernel_thread(test_thread2, NULL, 0), pid: 0x%08X\n", pid1);
 	pid_t pid2 = kernel_thread(test_thread3, NULL, 0);
+	printk_debug("kernel_thread(test_thread3, NULL, 0), pid: 0x%08X\n", pid2);
 	pid_t pid3 = kernel_thread(test_thread4, NULL, 0);
+	printk_debug("kernel_thread(test_thread4, NULL, 0), pid: 0x%08X\n", pid3);
 
+	printk_debug("set_task_name\n");
 	set_task_name(pid1, "test1");
 	set_task_name(pid2, "test2");
 	set_task_name(pid3, "test3");
-
 	show_task(TASK_MAX + 1);
-	show_task_mem(0);
-	show_task_pt_regs(0);
-	show_task_context(0);
-	show_task(pid1);
+
+	printk_debug("Show init task info:\n");
+	printk_debug("----------------------------\t\n");
+	show_task(0);
+	printk_debug("----------------------------\t\n");
+	while(1);
+	// printk_debug("test task switch\n");
+	// task_pcb_t * task0 = get_task(0);
+	// task_pcb_t * task1 = get_task(1);
+	// task_pcb_t * task2 = get_task(2);
+	// printk_debug("switch from 0 to 1\n");
+	//
+	// switch_to(task0, task1, task0);
+	//
+	// printk_debug("switch from 1 to 2\n");
+	// printk_debug("switch from 2 to 1\n");
+	// printk_debug("switch from 1 to 0\n");
 
 	return true;
 }

@@ -33,37 +33,43 @@ ListEntry * wait_list = NULL;
 // 返回一个空的任务控制块
 static task_pcb_t * alloc_task_pcb(void) {
 	// 申请内存
-	task_pcb_t * task_pcb = (task_pcb_t *)kmalloc(TASK_STACK_SIZE);
-	assert(task_pcb != NULL, "Error at task.c: alloc_task_pcb. No enough memory!\n");
-	bzero(task_pcb, TASK_STACK_SIZE);
-	// 填充
-	task_pcb->status = TASK_UNINIT;
-	task_pcb->pid = ++curr_pid;
+	task_pcb_t * task_pcb = (task_pcb_t *)NULL;
+	bool intr_flag = false;
+	local_intr_store(intr_flag);
+	{
+		task_pcb = (task_pcb_t *)kmalloc(TASK_STACK_SIZE);
+		assert(task_pcb != NULL, "Error at task.c: alloc_task_pcb. No enough memory!\n");
+		bzero(task_pcb, TASK_STACK_SIZE);
+		// 填充
+		task_pcb->status = TASK_UNINIT;
+		task_pcb->pid = ++curr_pid;
 
-	task_pcb->name = (char *)kmalloc(TASK_NAME_MAX + 1);
-	bzero(task_pcb->name, TASK_NAME_MAX + 1);
+		task_pcb->name = (char *)kmalloc(TASK_NAME_MAX + 1);
+		bzero(task_pcb->name, TASK_NAME_MAX + 1);
 
-	task_pcb->run_time = 0;
-	task_pcb->parent = NULL;
+		task_pcb->run_time = 0;
+		task_pcb->parent = NULL;
 
-	task_pcb->mm = (task_mem_t *)kmalloc(sizeof(task_mem_t) );
-	bzero(task_pcb->mm, sizeof(task_mem_t) );
-	task_pcb->mm->stack_top =  (ptr_t)task_pcb;
-	task_pcb->mm->stack_bottom = task_pcb->mm->stack_top + TASK_STACK_SIZE;
+		task_pcb->mm = (task_mem_t *)kmalloc(sizeof(task_mem_t) );
+		bzero(task_pcb->mm, sizeof(task_mem_t) );
+		task_pcb->mm->stack_top =  (ptr_t)task_pcb;
+		task_pcb->mm->stack_bottom = task_pcb->mm->stack_top + TASK_STACK_SIZE;
 
-	task_pcb->pt_regs = (pt_regs_t *)( (ptr_t)task_pcb->mm->stack_bottom - sizeof(pt_regs_t) );
-	bzero(task_pcb->pt_regs, sizeof(pt_regs_t) );
+		task_pcb->pt_regs = (pt_regs_t *)( (ptr_t)task_pcb->mm->stack_bottom - sizeof(pt_regs_t) );
+		bzero(task_pcb->pt_regs, sizeof(pt_regs_t) );
 
-	task_pcb->context = (task_context_t *)kmalloc(sizeof(task_context_t) );
-	bzero(task_pcb->context, sizeof(task_context_t) );
-	task_pcb->context->eip = (ptr_t)forkret_s233;
-	task_pcb->context->esp = (ptr_t)task_pcb->pt_regs;
+		task_pcb->context = (task_context_t *)kmalloc(sizeof(task_context_t) );
+		bzero(task_pcb->context, sizeof(task_context_t) );
+		task_pcb->context->eip = (ptr_t)forkret_s233;
+		task_pcb->context->esp = (ptr_t)task_pcb->pt_regs;
 
-	task_pcb->exit_code = 0xCD;
+		task_pcb->exit_code = 0xCD;
 
-	list_append(&task_list, task_pcb);
-	// 增加全局进程数量
-	curr_task_count++;
+		list_append(&task_list, task_pcb);
+		// 增加全局进程数量
+		curr_task_count++;
+	}
+	local_intr_restore(intr_flag);
 	return task_pcb;
 }
 
@@ -72,7 +78,7 @@ void task_init(void) {
 	bool intr_flag = false;
 	local_intr_store(intr_flag);
 	{
-		// 创建一个新的进程作为内核进程
+		// 填充初始进程信息
 		task_pcb_t * kernel_task = get_current_task();
 		assert( (ptr_t)kernel_task == KERNEL_STACK_TOP, "kernel_task not correct\n");
 		bzero(kernel_task, sizeof(task_pcb_t) );
@@ -84,13 +90,16 @@ void task_init(void) {
 		kernel_task->mm = (task_mem_t *)kmalloc(sizeof(task_mem_t) );
 		bzero(kernel_task->mm, sizeof(task_mem_t) );
 		kernel_task->mm->pgd_dir = pgd_kernel;
+		kernel_task->mm->stack_top =  (ptr_t)kernel_task;
+		kernel_task->mm->stack_bottom = kernel_task->mm->stack_top + TASK_STACK_SIZE;
 		// 设置上下文
 		kernel_task->context = (task_context_t *)kmalloc(sizeof(task_context_t) );
 		bzero(kernel_task->context, sizeof(task_context_t) );
-		// context->eip = (ptr_t)forkret_s233;
-		// context->esp = (ptr_t)task_pcb->pt_regs;
+		// kernel_task->context->eip = (ptr_t)forkret_s233;
+		// kernel_task->context->esp = (ptr_t)kernel_task->pt_regs;
 		// 设置寄存器信息
-		kernel_task->pt_regs = (pt_regs_t *)kmalloc(sizeof(pt_regs_t) );
+		kernel_task->pt_regs = (pt_regs_t *)( (ptr_t)kernel_task->mm->stack_bottom - sizeof(pt_regs_t) );
+		// kernel_task->pt_regs = (pt_regs_t *)kmalloc(sizeof(pt_regs_t) );
 		// kernel_task->pt_regs->cs = KERNEL_CS;
 		// kernel_task->pt_regs->ds = KERNEL_DS;
 		// kernel_task->pt_regs->es = KERNEL_DS;
@@ -139,23 +148,32 @@ static void copy_thread(task_pcb_t * task, pt_regs_t * pt_regs) {
 // 创建 PCB，设置相关信息后加入调度链表
 pid_t do_fork(uint32_t flags __UNUSED__, pt_regs_t * pt_regs) {
 	assert(curr_task_count < TASK_MAX, "Error: task.c curr_task_count >= TASK_MAX");
-	task_pcb_t * task = alloc_task_pcb();
-	assert(task != NULL, "Error: task.c task==NULL");
-	copy_thread(task, pt_regs);
-	task->status = TASK_RUNNABLE;
-	list_append(&runnable_list, task);
+	task_pcb_t * task = (task_pcb_t *)NULL;
+	bool intr_flag = false;
+	local_intr_store(intr_flag);
+	{
+		task = alloc_task_pcb();
+		assert(task != NULL, "Error: task.c task==NULL");
+		copy_thread(task, pt_regs);
+		task->status = TASK_RUNNABLE;
+		list_append(&runnable_list, task);
+	}
+	local_intr_restore(intr_flag);
 	return task->pid;
 }
 
 void do_exit(int32_t exit_code) {
-	cpu_cli();
-	printk_debug("do_exit pid: 0x%08X\n", get_current_task()->pid);
-	get_current_task()->status = TASK_ZOMBIE;
-	get_current_task()->exit_code = exit_code;
-	curr_pid--;
-	curr_task_count--;
-	print_stack(10);
-	// asm ("hlt");
+	bool intr_flag = false;
+	local_intr_store(intr_flag);
+	{
+		printk_debug("do_exit pid: 0x%08X\n", get_current_task()->pid);
+		get_current_task()->status = TASK_ZOMBIE;
+		get_current_task()->exit_code = exit_code;
+		curr_pid--;
+		curr_task_count--;
+		print_stack(2);
+	}
+	local_intr_restore(intr_flag);
 	return;
 }
 
@@ -210,16 +228,24 @@ void kexit() {
 
 // 设置进程名
 int32_t set_task_name(pid_t pid, char * name) {
-	task_pcb_t * task = get_task(pid);
-	if(task != NULL) {
-		// 设置进程名
-		strcpy(task->name, name);
-		return 0;
+	task_pcb_t * task = (task_pcb_t *)NULL;
+	int32_t ret = 0;
+	bool intr_flag = false;
+	local_intr_store(intr_flag);
+	{
+		task = get_task(pid);
+		if(task != NULL) {
+			// 设置进程名
+			strcpy(task->name, name);
+			ret = 0;
+		}
+		else {
+			printk("This pid 0x%08X not exist!\n", pid);
+			ret = -1;
+		}
 	}
-	else {
-		printk("This pid 0x%08X not exist!\n", pid);
-		return -1;
-	}
+	local_intr_restore(intr_flag);
+	return ret;
 }
 
 // 比较方法
@@ -229,14 +255,22 @@ static int vs_med(void * v1, void * v2) {
 
 // 从 pid 获取进程结构体
 task_pcb_t * get_task(pid_t pid) {
-	ListEntry * tmp = list_find_data(task_list, vs_med, (void *)pid);
-	if(tmp != NULL) {
-		return (task_pcb_t *)list_data(tmp);
+	ListEntry * tmp = (ListEntry *)NULL;
+	task_pcb_t * task = (task_pcb_t *)NULL;
+	bool intr_flag = false;
+	local_intr_store(intr_flag);
+	{
+		tmp = list_find_data(task_list, vs_med, (void *)pid);
+		if(tmp != NULL) {
+			task = (task_pcb_t *)list_data(tmp);
+		}
+		else {
+			printk("This pid 0x%08X not exist!\n", pid);
+			task = (task_pcb_t *)NULL;
+		}
 	}
-	else {
-		printk("This pid 0x%08X not exist!\n", pid);
-		return (task_pcb_t *)NULL;
-	}
+	local_intr_restore(intr_flag);
+	return task;
 }
 
 // 显示指定 pid 进程的 mem 信息

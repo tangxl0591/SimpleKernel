@@ -18,7 +18,8 @@ extern "C" {
 // 中断描述符表
 static idt_entry_t idt_entries[INTERRUPT_MAX] __attribute__( (aligned(16) ) );
 
-static idt_ptr_t idt_ptr; // IDTR
+// IDTR
+static idt_ptr_t idt_ptr;
 
 // 设置中断描述符
 static void idt_set_gate(uint8_t num, uint32_t base, uint16_t target, uint8_t flags) {
