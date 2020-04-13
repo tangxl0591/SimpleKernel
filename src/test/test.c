@@ -93,12 +93,13 @@ bool test_task(void) {
 	printk_debug("test task switch\n");
 	task_pcb_t * task0 = get_task(0);
 	task_pcb_t * task1 = get_task(1);
-	// task_pcb_t * task2 = get_task(2);
+	task_pcb_t * task2 = get_task(2);
 	printk_debug("switch from 0 to 1\n");
 
 	switch_to(task0, task1, task0);
 
-	// printk_debug("switch from 1 to 2\n");
+	printk_debug("switch from 0 to 2\n");
+	switch_to(task0, task2, task0);
 	// printk_debug("switch from 2 to 1\n");
 	// printk_debug("switch from 1 to 0\n");
 
