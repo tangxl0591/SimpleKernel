@@ -20,9 +20,9 @@ bool test_heap(void);
 bool test_task(void);
 bool test_sched(void);
 
+int32_t test_thread1(void * arg);
 int32_t test_thread2(void * arg);
 int32_t test_thread3(void * arg);
-int32_t test_thread4(void * arg);
 
 #ifdef __cplusplus
 }

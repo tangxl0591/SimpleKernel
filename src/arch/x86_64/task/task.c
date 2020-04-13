@@ -164,18 +164,49 @@ pid_t do_fork(uint32_t flags __UNUSED__, pt_regs_t * pt_regs) {
 	return task->pid;
 }
 
+#define switch_to233(prev, next, last) \
+	do { \
+		uint32_t ebx, ecx, edx, esi, edi; \
+		__asm__ volatile ( \
+		"pushfl\n\t" \
+		"pushl %%ebp\n\t" \
+		"movl %%esp,%[prev_sp]\n\t" \
+		"movl %[next_sp],%%esp\n\t" \
+		"movl $1f,%[prev_ip]\n\t" \
+		"pushl %[next_ip]\n\t" \
+		"jmp __switch_to\n" \
+		"1:\n\t" \
+		"popl %%ebp\n\t" \
+		"popfl\n" \
+		:[prev_sp] "=m" ( (prev)->context->esp), \
+		[prev_ip] "=m" ( (prev)->context->eip), \
+		"=a" (last), \
+		"=b" (ebx), "=c" (ecx), "=d" (edx), \
+		"=S" (esi), "=D" (edi) \
+		:[next_sp]  "m" ( (next)->context->esp), \
+		[next_ip]  "m" ( (next)->context->eip), \
+		[prev]     "a" (prev), \
+		[next]     "d" (next) \
+		: "memory"); \
+	} while(0)
+
 void do_exit(int32_t exit_code) {
 	bool intr_flag = false;
 	local_intr_store(intr_flag);
 	{
 		printk_debug("do_exit pid: 0x%08X\n", get_current_task()->pid);
-		get_current_task()->status = TASK_ZOMBIE;
-		get_current_task()->exit_code = exit_code;
+		// get_current_task()->status = TASK_ZOMBIE;
+		// get_current_task()->exit_code = exit_code;
 		curr_pid--;
 		curr_task_count--;
 		print_stack(2);
 	}
 	local_intr_restore(intr_flag);
+	// 切换到下个进程
+	// while(1);
+	task_pcb_t * task0 = get_task(0);
+	task_pcb_t * task1 = get_task(1);
+	switch_to233(task1, task0, task1);
 	return;
 }
 
