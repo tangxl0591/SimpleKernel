@@ -95,19 +95,21 @@ void task_init(void) {
 		// 设置上下文
 		kernel_task->context = (task_context_t *)kmalloc(sizeof(task_context_t) );
 		bzero(kernel_task->context, sizeof(task_context_t) );
-		// kernel_task->context->eip = (ptr_t)forkret_s233;
-		// kernel_task->context->esp = (ptr_t)kernel_task->pt_regs;
 		// 设置寄存器信息
 		kernel_task->pt_regs = (pt_regs_t *)( (ptr_t)kernel_task->mm->stack_bottom - sizeof(pt_regs_t) );
+		// !NOTE!
+		// 这里还没搞清楚 pt_regs 的原理，按理说这个部分应该是像上面那部分，保存在进程栈的底部的，但是
+		// 如果这么写会覆盖掉栈中原有的东西
 		// kernel_task->pt_regs = (pt_regs_t *)kmalloc(sizeof(pt_regs_t) );
-		// kernel_task->pt_regs->cs = KERNEL_CS;
-		// kernel_task->pt_regs->ds = KERNEL_DS;
-		// kernel_task->pt_regs->es = KERNEL_DS;
-		// kernel_task->pt_regs->fs = KERNEL_DS;
-		// kernel_task->pt_regs->gs = KERNEL_DS;
-		// kernel_task->pt_regs->user_ss = KERNEL_DS;
-		// kernel_task->pt_regs->eflags |= EFLAGS_IF;
-		// kernel_task->pt_regs->eip = (ptr_t)forkret_s233;
+		kernel_task->pt_regs->gs = KERNEL_DS;
+		kernel_task->pt_regs->fs = KERNEL_DS;
+		kernel_task->pt_regs->es = KERNEL_DS;
+		kernel_task->pt_regs->ds = KERNEL_DS;
+		kernel_task->pt_regs->eip = (ptr_t)forkret_s233;
+		kernel_task->pt_regs->cs = KERNEL_CS;
+		kernel_task->pt_regs->eflags |= EFLAGS_IF;
+		kernel_task->pt_regs->user_ss = KERNEL_DS;
+
 		// 设置进程运行状态
 		kernel_task->status = TASK_RUNNING;
 		curr_task = kernel_task;

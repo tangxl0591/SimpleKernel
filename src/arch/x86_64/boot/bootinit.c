@@ -74,7 +74,7 @@ void mm_init() {
 // 内核入口函数
 void kernel_entry(ptr_t magic, ptr_t addr) {
 	mm_init();
-	cpu_switch_stack(KERNEL_STACK_BOTTOM);
+	cpu_switch_stack(KERNEL_STACK_BOTTOM - sizeof(pt_regs_t) );
 	kernel_main(magic, KERNEL_BASE + addr);
 	return;
 }

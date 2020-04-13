@@ -166,7 +166,7 @@ void show_pt_regs(pt_regs_t * pt_regs) {
 	    pt_regs->ebx, pt_regs->edx, pt_regs->ecx, pt_regs->eax);
 	printk("int_no: 0x%08X\terr_code: %08X\teip: 0x%08X\tcs: 0x%08X\n",
 	    pt_regs->int_no, pt_regs->err_code, pt_regs->eip, pt_regs->cs);
-	printk("eflags: 0x%08X\tuser_esp: 0x%08X\tss: 0x%08X\n",
+	printk("eflags: 0x%08X\tuser_esp: 0x%08X\tuser_ss: 0x%08X\n",
 	    pt_regs->eflags, pt_regs->user_esp, pt_regs->user_ss);
 	return;
 }
