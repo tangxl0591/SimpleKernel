@@ -36,10 +36,26 @@ bool test_pmm(void) {
 	pmm_free(allc_addr3, 1);
 	pmm_free(allc_addr4, 1);
 	printk_test("Free pages count: %d\n", pmm_free_pages_count() );
+	printk_test("---------Pmm test end.---------\n");
 	return true;
 }
 
 bool test_vmm(void) {
+	printk_test("Test vmm:\n");
+	printk_test("map1:\n");
+	ptr_t pa1 = pmm_alloc(VMM_PAGE_SIZE);
+	ptr_t va1 = 0x80000;
+	map(pgd_kernel, va1, pa1, VMM_PAGE_PRESENT | VMM_PAGE_RW);
+	bzero( (void *)va1, VMM_PAGE_SIZE);
+
+	printk_test("map2:\n");
+	ptr_t pa2 = pmm_alloc(VMM_PAGE_SIZE);
+	ptr_t va2 = 0x80100;
+	map(pgd_kernel, va2, pa2, VMM_PAGE_PRESENT | VMM_PAGE_RW);
+	bzero( (void *)va2, VMM_PAGE_SIZE);
+
+
+	printk_test("---------Vmm test end.---------\n");
 	return true;
 }
 
@@ -73,9 +89,9 @@ int32_t test_thread3(void * arg __UNUSED__) {
 
 bool test_task(void) {
 	pid_t pid1 = kernel_thread(test_thread1, NULL, 0);
-	// printk_debug("kernel_thread(test_thread1, NULL, 0), pid: 0x%08X\n", pid1);
+	printk_debug("kernel_thread(test_thread1, NULL, 0), pid: 0x%08X\n", pid1);
 	pid_t pid2 = kernel_thread(test_thread2, NULL, 0);
-	// printk_debug("kernel_thread(test_thread2, NULL, 0), pid: 0x%08X\n", pid2);
+	printk_debug("kernel_thread(test_thread2, NULL, 0), pid: 0x%08X\n", pid2);
 	// pid_t pid3 = kernel_thread(test_thread3, NULL, 0);
 	// printk_debug("kernel_thread(test_thread3, NULL, 0), pid: 0x%08X\n", pid3);
 
@@ -98,11 +114,12 @@ bool test_task(void) {
 
 	switch_to(task0, task1, task0);
 
-	printk_debug("switch from 0 to 2\n");
-	switch_to(task0, task2, task0);
+	// printk_debug("switch from 0 to 2\n");
+	// switch_to(task0, task2, task0);
 	// printk_debug("switch from 2 to 1\n");
 	// printk_debug("switch from 1 to 0\n");
 
+	printk_test("---------Task test end.---------\n");
 	return true;
 }
 
@@ -130,15 +147,16 @@ bool test_heap(void) {
 	kfree( (ptr_t)allc_addr4);
 	ptr_t new_addr = (ptr_t)kmalloc(9000);
 	printk_test("New kmalloc heap addr: 0x%08X\n", new_addr);
+	printk_test("---------Heap test end.---------\n");
 	return true;
 }
 
 bool test(void) {
 	// test_pmm();
-	// test_vmm();
+	test_vmm();
 	// test_libc();
 	// test_heap();
-	test_task();
+	// test_task();
 	// test_sched();
 	return true;
 }

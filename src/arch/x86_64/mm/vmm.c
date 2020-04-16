@@ -57,14 +57,18 @@ void map(pgd_t * pgd_now, ptr_t va, ptr_t pa, uint32_t flags) {
 	uint32_t pgd_idx = VMM_PGD_INDEX(va);
 	uint32_t pte_idx = VMM_PTE_INDEX(va);
 	pte_t * pte = (pte_t *)(pgd_now[pgd_idx] & VMM_PAGE_MASK);
+	printk_debug("pte1:0x%08X ", pte);
+	// printk_debug("---:0x%08X ", pgd_now[pgd_idx]);
 	// 转换到内核线性地址
 	if(pte == NULL) {
-		pgd_now[pgd_idx] = (uint32_t)pte | flags;
+		// pte = (pte_t *)pmm_alloc(VMM_PAGE_SIZE);
+		// printk_debug("pte2:0x%08X ", pte);
+		pgd_now[pgd_idx] = (pte_t)pte | VMM_PAGE_PRESENT | VMM_PAGE_RW | VMM_PAGE_KERNEL;
 		pte = (pte_t *)VMM_PA_LA( (ptr_t)pte);
+		// printk_debug("---2:0x%08X ", pgd_now[pgd_idx]);
 	} else {
 		pte = (pte_t *)VMM_PA_LA( (ptr_t)pte);
 	}
-
 	pte[pte_idx] = (pa & VMM_PAGE_MASK) | flags;
 	// 通知 CPU 更新页表缓存
 	CPU_INVLPG(va);
@@ -86,20 +90,25 @@ void unmap(pgd_t * pgd_now, ptr_t va) {
 // 如果虚拟地址 va 映射到物理地址则返回 1
 // 同时如果 pa 不是空指针则把物理地址写入 pa 参数
 uint32_t get_mapping(pgd_t * pgd_now, ptr_t va, ptr_t * pa) {
+	// printk_debug("pgd_now: 0x%08X, va: 0x%08X\n", pgd_now, va);
 	uint32_t pgd_idx = VMM_PGD_INDEX(va);
 	uint32_t pte_idx = VMM_PTE_INDEX(va);
-
+	// printk_debug("pgd_idx: 0x%08X, pte_idx: 0x%08X\t", pgd_idx, pte_idx);
 	pte_t * pte = (pte_t *)(pgd_now[pgd_idx] & VMM_PAGE_MASK);
+	// printk_debug("pte: 0x%08X ", pte);
 	if(pte == NULL) {
 		return 0;
 	}
 	// 转换到内核线性地址
 	pte = (pte_t *)VMM_PA_LA( (ptr_t)pte);
+	// printk_debug("pte: 0x%08X, pte[pte_idx]: 0x%08X\n", pte, pte[pte_idx]);
 	// 如果地址有效而且指针不为 NULL
 	if( (void *)pte[pte_idx] != NULL) {
+
 		if( (void *)pa != NULL) {
 			*pa = pte[pte_idx] & VMM_PAGE_MASK;
 		}
+		// printk_debug("-+++++++++\n");
 		return 1;
 	}
 	return 0;

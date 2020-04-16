@@ -354,22 +354,23 @@ ptr_t alloc_stack(void) {
 	while(va_start < va + KERNEL_STACK_SIZE) {
 		// 如果当前 va 映射过了
 		if(get_mapping(pgd_kernel, va_start, (ptr_t *)NULL) != 0) {
-			// printk_debug("1\n");
+			// printk_debug("1\t");
 			// va 跳过 KERNEL_STACK_SIZE 大小
 			va += KERNEL_STACK_SIZE;
 			// 重新开始测试
 			va_start = va;
 		}
 		else {
-			// printk_debug("2\n");
+			// printk_debug("2\t");
 			va_start += VMM_PAGE_SIZE;
 		}
+		// printk_debug("pa233: 0x%08X\t", pa233);
 	}
 	// 循环结束后 va 即为可用地址，逐一进行映射
 	for(ptr_t va_tmp = va, pa_tmp = pa ;
 	    va_tmp < va + KERNEL_STACK_SIZE ;
 	    va_tmp += VMM_PAGE_SIZE, pa += VMM_PAGE_SIZE) {
-		// printk_debug("3\n");
+		// printk_debug("va_tmp: 0x%08X, pa_tmp: 0x%08X\n", va_tmp, pa_tmp);
 		map(pgd_kernel, va_tmp, pa_tmp, VMM_PAGE_PRESENT | VMM_PAGE_RW);
 	}
 	return (ptr_t)va;
