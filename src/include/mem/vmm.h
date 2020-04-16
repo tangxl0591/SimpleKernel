@@ -72,6 +72,11 @@ extern "C" {
 // 获取一个地址的页內偏移，低 12 位
 #define VMM_OFFSET_INDEX(x)     ( (x) & 0x0FFF)
 
+// 将线性地址转换为物理地址
+#define VMM_LA_PA(la) (la - KERNEL_BASE)
+// 将物理地址转换为线性地址
+#define VMM_PA_LA(pa) (pa + KERNEL_BASE)
+
 // 页全局目录项
 typedef ptr_t pgd_t;
 
@@ -105,9 +110,6 @@ void switch_pgd(ptr_t pd);
 
 // 初始化内核页目录
 void vmm_kernel_init(pgd_t * pgd);
-
-#define VMM_LA_PA(la) (la - KERNEL_BASE)
-#define VMM_PA_LA(pa) (pa + KERNEL_BASE)
 
 #ifdef __cplusplus
 }
