@@ -53,7 +53,7 @@ void kernel_main(ptr_t magic, ptr_t addr) {
 	// 确保允许中断
 	cpu_sti();
 
-	for(int i = 0 ; i < 100 ; i++) {
+	for(int i = 0 ; i < 79 ; i++) {
 		printk("8");
 	}
 	printk("\n");

@@ -27,8 +27,6 @@ void sched_init() {
 		// 注册时间相关的处理函数
 		register_interrupt_handler(IRQ0, &clock_handler);
 		enable_irq(IRQ0);
-		// curr_task = get_current_task();
-		// printk_debug("curr_task: 0x%08X\n", curr_task);
 		printk_info("sched init\n");
 	}
 	local_intr_restore(intr_flag);

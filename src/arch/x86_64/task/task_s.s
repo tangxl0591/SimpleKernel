@@ -18,8 +18,8 @@ kthread_entry:
     # 保存返回值
     push %eax
 
-    push $str
-    call printk_debug
-    add $0x04, %esp
+    // push $str
+    // call printk_debug
+    // add $0x04, %esp
 
     call do_exit

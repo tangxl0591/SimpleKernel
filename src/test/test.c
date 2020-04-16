@@ -48,7 +48,7 @@ bool test_libc(void) {
 }
 
 int32_t test_thread1(void * arg __UNUSED__) {
-	for(int i = 0 ; i < 100 ; i++) {
+	for(int i = 0 ; i < 79 ; i++) {
 		printk("1");
 	}
 	printk("\n");
@@ -56,7 +56,7 @@ int32_t test_thread1(void * arg __UNUSED__) {
 }
 
 int32_t test_thread2(void * arg __UNUSED__) {
-	for(int i = 0 ; i < 100 ; i++) {
+	for(int i = 0 ; i < 79 ; i++) {
 		printk("2");
 	}
 	printk("\n");
@@ -64,7 +64,7 @@ int32_t test_thread2(void * arg __UNUSED__) {
 }
 
 int32_t test_thread3(void * arg __UNUSED__) {
-	for(int i = 0 ; i < 100 ; i++) {
+	for(int i = 0 ; i < 79 ; i++) {
 		printk("3");
 	}
 	printk("\n");
@@ -73,21 +73,21 @@ int32_t test_thread3(void * arg __UNUSED__) {
 
 bool test_task(void) {
 	pid_t pid1 = kernel_thread(test_thread1, NULL, 0);
-	printk_debug("kernel_thread(test_thread1, NULL, 0), pid: 0x%08X\n", pid1);
+	// printk_debug("kernel_thread(test_thread1, NULL, 0), pid: 0x%08X\n", pid1);
 	pid_t pid2 = kernel_thread(test_thread2, NULL, 0);
-	printk_debug("kernel_thread(test_thread2, NULL, 0), pid: 0x%08X\n", pid2);
-	pid_t pid3 = kernel_thread(test_thread3, NULL, 0);
-	printk_debug("kernel_thread(test_thread3, NULL, 0), pid: 0x%08X\n", pid3);
+	// printk_debug("kernel_thread(test_thread2, NULL, 0), pid: 0x%08X\n", pid2);
+	// pid_t pid3 = kernel_thread(test_thread3, NULL, 0);
+	// printk_debug("kernel_thread(test_thread3, NULL, 0), pid: 0x%08X\n", pid3);
 
-	printk_debug("set_task_name\n");
-	set_task_name(pid1, "test1");
-	set_task_name(pid2, "test2");
-	set_task_name(pid3, "test3");
-	show_task(TASK_MAX + 1);
+	// printk_debug("set_task_name\n");
+	// set_task_name(pid1, "test1");
+	// set_task_name(pid2, "test2");
+	// set_task_name(pid3, "test3");
+	// show_task(TASK_MAX + 1);
 
-	printk_debug("Show init task info:\n");
-	printk_debug("----------------------------\t\n");
-	show_task(0);
+	// printk_debug("Show init task info:\n");
+	// printk_debug("----------------------------\t\n");
+	// show_task(0);
 	printk_debug("----------------------------\t\n");
 	// while(1);
 	printk_debug("test task switch\n");

@@ -155,6 +155,7 @@ pid_t do_fork(uint32_t flags __UNUSED__, pt_regs_t * pt_regs) {
 	local_intr_store(intr_flag);
 	{
 		task = alloc_task_pcb();
+		printk_debug("do_fork task: 0x%08X\n", task);
 		assert(task != NULL, "Error: task.c task==NULL");
 		copy_thread(task, pt_regs);
 		task->status = TASK_RUNNABLE;
@@ -169,11 +170,13 @@ void do_exit(int32_t exit_code) {
 	local_intr_store(intr_flag);
 	{
 		printk_debug("do_exit pid: 0x%08X\n", get_current_task()->pid);
+		printk_debug("do_exit exit_code: 0x%08X\n", exit_code);
+		printk_debug("do_exit get_current_task(): 0x%08X\n", get_current_task() );
 		// get_current_task()->status = TASK_ZOMBIE;
 		// get_current_task()->exit_code = exit_code;
 		curr_pid--;
 		curr_task_count--;
-		print_stack(2);
+		// print_stack(2);
 	}
 	local_intr_restore(intr_flag);
 	// 切换到下个进程
@@ -181,7 +184,7 @@ void do_exit(int32_t exit_code) {
 	task_pcb_t * task0 = get_task(0);
 	task_pcb_t * task1 = get_task(1);
 	task_pcb_t * task2 = get_task(2);
-	if(get_current_task()->pid == 0x2010)
+	if(exit_code == 1)
 		switch_to(task1, task0, task1);
 	else
 		switch_to(task2, task0, task2);
@@ -196,6 +199,7 @@ task_pcb_t * get_current_task(void) {
 	local_intr_store(intr_flag);
 	{
 		register uint32_t esp __asm__ ("esp");
+		// esp&0xFFFFE000
 		task = (task_pcb_t *)(esp & (~(TASK_STACK_SIZE - 1) ) );
 	}
 	local_intr_restore(intr_flag);
