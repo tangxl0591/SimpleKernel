@@ -240,61 +240,55 @@ static inline list_entry_t * find_entry(size_t len);
 list_entry_t * find_entry(size_t len) {
 	list_entry_t * entry = sb_manage.slab_list;
 	do {
+		// printk_debug("7\n");
 		// 查找符合长度且未使用，符合对齐要求的内存
 		if( (list_slab_block(entry)->len >= len)
 		    && (list_slab_block(entry)->allocated == SLAB_UNUSED) ) {
+			// printk_debug("8\n");
 			// 进行分割，这个函数会同时设置 entry 的信息
 			slab_split(entry, len);
 			return entry;
 		}
 		// 没找到的话就查找下一个
 		else {
+			// printk_debug("9\n");
 			entry = list_next(entry);
 		}
+		// printk_debug("10\n");
 	} while(list_next(entry) != sb_manage.slab_list);
+	// printk_debug("11\n");
 	return (list_entry_t *)NULL;
 }
 
 // 申请新的内存页
 // 参数分别为：虚拟地址起点，要申请的页数
+// 有了 va 参数可以减少一部分循环
 static inline ptr_t alloc_page(ptr_t va, size_t page);
 ptr_t alloc_page(ptr_t va, size_t page) {
-	ptr_t pa = pmm_alloc(page * VMM_PAGE_SIZE);
-	if(pa == (ptr_t)NULL) {
-		printk_err("Error at slab.c ptr_t alloc_page(): no enough physical memory\n");
-		return (ptr_t)NULL;
-	}
-	for(ptr_t va_start = va, pa_start = pa ;
-	    pa_start < pa + VMM_PAGE_SIZE * page ;
-	    pa_start += VMM_PAGE_SIZE, va_start += VMM_PAGE_SIZE) {
-		// 如果当前线性地址没有映射
-		if(get_mapping(pgd_kernel, va_start, (ptr_t *)NULL) == 0) {
-			map(pgd_kernel, va_start, pa_start, VMM_PAGE_PRESENT | VMM_PAGE_RW);
+	// 直接在物理地址里申请
+	ptr_t pa = (ptr_t)NULL;
+	pa = pmm_alloc(page * VMM_PAGE_SIZE);
+	// 然后映射到符合要求的虚拟地址
+	// 虚拟地址通过计算得出
+	ptr_t va_start = va;
+	// 测试范围：va～va + page * VMM_PAGE_SIZE
+	while(va_start < va + page * VMM_PAGE_SIZE) {
+		// 如果当前 va 映射过了
+		if(get_mapping(pgd_kernel, va_start, (ptr_t *)NULL) != 0) {
+			// va 跳过 KERNEL_STACK_SIZE 大小
+			va += VMM_PAGE_SIZE;
+			// 重新开始测试
+			va_start = va;
 		}
 		else {
-			// 如果有部分映射了，则全部 unmap
-			ptr_t addr = (ptr_t)NULL;
-			for(addr = va ; addr < va_start ; addr += VMM_PAGE_SIZE) {
-				unmap(pgd_kernel, addr);
-			}
-			// 并重新计算 va 的值
-			// 运行到这里时 addr 尚未被检测，所以下面的代码从 addr 开始
-			// 计算方法：addr~addr+page*VMM_PAGE_SIZE 的 get_mapping 结果全部为 0
-			ptr_t tmp = addr;
-			while(addr < tmp + page * VMM_PAGE_SIZE) {
-				// 如果遇到映射过的
-				if(get_mapping(pgd_kernel, addr, (ptr_t *)NULL) != 0) {
-					// 更新 addr 地址
-					addr += VMM_PAGE_SIZE;
-					tmp = addr;
-				}
-				addr += VMM_PAGE_SIZE;
-			}
-			// 这时 addr 就是符合要求的地址
-			// 全部映射即可
-			map(pgd_kernel, addr, pa_start, VMM_PAGE_PRESENT | VMM_PAGE_RW);
-			return addr;
+			va_start += VMM_PAGE_SIZE;
 		}
+	}
+	// 循环结束后 va 即为可用地址，逐一进行映射
+	for(ptr_t va_tmp = va, pa_tmp = pa ;
+	    va_tmp < va + page * VMM_PAGE_SIZE ;
+	    va_tmp += VMM_PAGE_SIZE, pa += VMM_PAGE_SIZE) {
+		map(pgd_kernel, va_tmp, pa_tmp, VMM_PAGE_PRESENT | VMM_PAGE_RW);
 	}
 	bzero( (void *)va, VMM_PAGE_SIZE * page);
 	return va;
@@ -303,7 +297,9 @@ ptr_t alloc_page(ptr_t va, size_t page) {
 ptr_t alloc(size_t byte) {
 	// 所有申请的内存长度(限制最小大小)加上管理头的长度
 	size_t len = (byte > SLAB_MIN) ? byte : SLAB_MIN;
+	// printk_debug("6\n");
 	list_entry_t * entry = find_entry(len);
+	// printk_debug("20\n");
 	if(entry != NULL) {
 		set_used(entry);
 		return (ptr_t)( (ptr_t)entry + sizeof(list_entry_t) );
@@ -350,22 +346,22 @@ ptr_t alloc_stack(void) {
 	pa = pmm_alloc(KERNEL_STACK_SIZE);
 	// 然后映射到符合要求的虚拟地址
 	// 虚拟地址通过计算得出
-	// 0x80000000UL: HEAP_START
-	ptr_t va = sb_manage.addr_start;
+	// 正式分配从 sb_manage.addr_start+8KB 开始
+	ptr_t va = sb_manage.addr_start + 0x2000;
 	ptr_t va_start = va;
 	// va 需要符合条件：va%KERNEL_STACK_SIZE == 0，即每次增加 KERNEL_STACK_SIZE 大小
 	// 测试范围：va～va+KERNEL_STACK_SIZE
 	while(va_start < va + KERNEL_STACK_SIZE) {
 		// 如果当前 va 映射过了
 		if(get_mapping(pgd_kernel, va_start, (ptr_t *)NULL) != 0) {
-			printk_debug("1\n");
+			// printk_debug("1\n");
 			// va 跳过 KERNEL_STACK_SIZE 大小
 			va += KERNEL_STACK_SIZE;
 			// 重新开始测试
 			va_start = va;
 		}
 		else {
-			printk_debug("2\n");
+			// printk_debug("2\n");
 			va_start += VMM_PAGE_SIZE;
 		}
 	}
@@ -373,7 +369,7 @@ ptr_t alloc_stack(void) {
 	for(ptr_t va_tmp = va, pa_tmp = pa ;
 	    va_tmp < va + KERNEL_STACK_SIZE ;
 	    va_tmp += VMM_PAGE_SIZE, pa += VMM_PAGE_SIZE) {
-		printk_debug("3\n");
+		// printk_debug("3\n");
 		map(pgd_kernel, va_tmp, pa_tmp, VMM_PAGE_PRESENT | VMM_PAGE_RW);
 	}
 	return (ptr_t)va;

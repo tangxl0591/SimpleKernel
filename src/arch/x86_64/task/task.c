@@ -91,9 +91,9 @@ static task_pcb_t * alloc_task_pcb(void) {
 		// 填充
 		task_pcb->status = TASK_UNINIT;
 		task_pcb->pid = ++curr_pid;
-		printk_debug("4\n");
+		// printk_debug("4\n");
 		task_pcb->name = (char *)kmalloc(TASK_NAME_MAX + 1);
-		printk_debug("5\n");
+		// printk_debug("5\n");
 		bzero(task_pcb->name, TASK_NAME_MAX + 1);
 
 		task_pcb->run_time = 0;
