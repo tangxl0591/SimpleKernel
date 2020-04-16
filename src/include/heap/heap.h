@@ -14,9 +14,9 @@ extern "C" {
 #include "stddef.h"
 
 // 堆起始地址 2GB 处，向上增长
-#define HEAP_START      (0x80000000)
+#define HEAP_START      (0x80000000UL)
 // 堆最大容量 4MB
-#define HEAP_MAX_SIZE   (0x400000)
+#define HEAP_MAX_SIZE   (0x400000UL)
 
 // 堆管理结构体
 typedef

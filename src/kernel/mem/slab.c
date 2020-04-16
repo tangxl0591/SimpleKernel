@@ -231,6 +231,7 @@ void slab_merge(list_entry_t * list) {
 		list_del(entry);
 		sb_manage.block_count -= 1;
 	}
+	// 如果大于一页则释放掉 TODO
 	return;
 }
 
@@ -299,13 +300,6 @@ ptr_t alloc_page(ptr_t va, size_t page) {
 	return va;
 }
 
-// 释放内存页
-// va: 虚拟地址起点
-static inline void free_page(ptr_t va);
-void free_page(ptr_t va) {
-	return;
-}
-
 ptr_t alloc(size_t byte) {
 	// 所有申请的内存长度(限制最小大小)加上管理头的长度
 	size_t len = (byte > SLAB_MIN) ? byte : SLAB_MIN;
@@ -321,7 +315,7 @@ ptr_t alloc(size_t byte) {
 	size_t pages = (len % VMM_PAGE_SIZE == 0) ? (len / VMM_PAGE_SIZE) : ( (len / VMM_PAGE_SIZE) + 1);
 	ptr_t va = alloc_page( (ptr_t)( (ptr_t)entry + sizeof(list_entry_t) + list_slab_block(entry)->len), pages);
 	if(va == (ptr_t)NULL) {
-		printk_err("Error at slab.c ptr_t alloc_align(): no enough physical memory\n");
+		printk_err("Error at slab.c ptr_t alloc(): no enough physical memory\n");
 		return (ptr_t)NULL;
 	}
 	new_entry = (list_entry_t *)va;
@@ -356,13 +350,40 @@ ptr_t alloc_stack(void) {
 	pa = pmm_alloc(KERNEL_STACK_SIZE);
 	// 然后映射到符合要求的虚拟地址
 	// 虚拟地址通过计算得出
-	ptr_t va = (ptr_t)NULL;
-	// va 需要符合条件：va%KERNEL_STACK_SIZE == 0
+	// 0x80000000UL: HEAP_START
+	ptr_t va = sb_manage.addr_start;
+	ptr_t va_start = va;
+	// va 需要符合条件：va%KERNEL_STACK_SIZE == 0，即每次增加 KERNEL_STACK_SIZE 大小
+	// 测试范围：va～va+KERNEL_STACK_SIZE
+	while(va_start < va + KERNEL_STACK_SIZE) {
+		// 如果当前 va 映射过了
+		if(get_mapping(pgd_kernel, va_start, (ptr_t *)NULL) != 0) {
+			printk_debug("1\n");
+			// va 跳过 KERNEL_STACK_SIZE 大小
+			va += KERNEL_STACK_SIZE;
+			// 重新开始测试
+			va_start = va;
+		}
+		else {
+			printk_debug("2\n");
+			va_start += VMM_PAGE_SIZE;
+		}
+	}
+	// 循环结束后 va 即为可用地址，逐一进行映射
+	for(ptr_t va_tmp = va, pa_tmp = pa ;
+	    va_tmp < va + KERNEL_STACK_SIZE ;
+	    va_tmp += VMM_PAGE_SIZE, pa += VMM_PAGE_SIZE) {
+		printk_debug("3\n");
+		map(pgd_kernel, va_tmp, pa_tmp, VMM_PAGE_PRESENT | VMM_PAGE_RW);
+	}
 	return (ptr_t)va;
 }
 
 // 栈的回收，直接取消映射
 void free_stack(ptr_t addr) {
+	for(ptr_t va = addr ; va < addr + KERNEL_STACK_SIZE ; va += VMM_PAGE_SIZE) {
+		unmap(pgd_kernel, va);
+	}
 	return;
 }
 

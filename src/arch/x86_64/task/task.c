@@ -28,47 +28,6 @@ ListEntry * runnable_list = NULL;
 // 等待进程链表
 ListEntry * wait_list = NULL;
 
-// 返回一个空的任务控制块
-static task_pcb_t * alloc_task_pcb(void) {
-	// 申请内存
-	task_pcb_t * task_pcb = (task_pcb_t *)NULL;
-	bool intr_flag = false;
-	local_intr_store(intr_flag);
-	{
-		task_pcb = (task_pcb_t *)kmalloc(TASK_STACK_SIZE);
-		assert(task_pcb != NULL, "Error at task.c: alloc_task_pcb. No enough memory!\n");
-		bzero(task_pcb, TASK_STACK_SIZE);
-		// 填充
-		task_pcb->status = TASK_UNINIT;
-		task_pcb->pid = ++curr_pid;
-
-		task_pcb->name = (char *)kmalloc(TASK_NAME_MAX + 1);
-		bzero(task_pcb->name, TASK_NAME_MAX + 1);
-
-		task_pcb->run_time = 0;
-		task_pcb->parent = NULL;
-
-		task_pcb->mm = (task_mem_t *)kmalloc(sizeof(task_mem_t) );
-		bzero(task_pcb->mm, sizeof(task_mem_t) );
-		task_pcb->mm->stack_top =  (ptr_t)task_pcb;
-		task_pcb->mm->stack_bottom = task_pcb->mm->stack_top + TASK_STACK_SIZE;
-
-		task_pcb->pt_regs = (pt_regs_t *)( (ptr_t)task_pcb->mm->stack_bottom - sizeof(pt_regs_t) );
-		bzero(task_pcb->pt_regs, sizeof(pt_regs_t) );
-
-		task_pcb->context = (task_context_t *)kmalloc(sizeof(task_context_t) );
-		bzero(task_pcb->context, sizeof(task_context_t) );
-		task_pcb->context->eip = (ptr_t)forkret_s233;
-		task_pcb->context->esp = (ptr_t)task_pcb->pt_regs;
-
-		task_pcb->exit_code = 0xCD;
-
-		list_append(&task_list, task_pcb);
-	}
-	local_intr_restore(intr_flag);
-	return task_pcb;
-}
-
 // 为正在运行的进程初始化控制信息
 void task_init(void) {
 	bool intr_flag = false;
@@ -116,6 +75,48 @@ void task_init(void) {
 	}
 	local_intr_restore(intr_flag);
 	return;
+}
+
+// 返回一个空的任务控制块
+static task_pcb_t * alloc_task_pcb(void) {
+	// 申请内存
+	task_pcb_t * task_pcb = (task_pcb_t *)NULL;
+	bool intr_flag = false;
+	local_intr_store(intr_flag);
+	{
+		// task_pcb = (task_pcb_t *)kmalloc(TASK_STACK_SIZE);
+		task_pcb = (task_pcb_t *)kmalloc_stack();
+		assert(task_pcb != NULL, "Error at task.c: alloc_task_pcb. No enough memory!\n");
+		bzero(task_pcb, TASK_STACK_SIZE);
+		// 填充
+		task_pcb->status = TASK_UNINIT;
+		task_pcb->pid = ++curr_pid;
+		printk_debug("4\n");
+		task_pcb->name = (char *)kmalloc(TASK_NAME_MAX + 1);
+		printk_debug("5\n");
+		bzero(task_pcb->name, TASK_NAME_MAX + 1);
+
+		task_pcb->run_time = 0;
+		task_pcb->parent = NULL;
+		task_pcb->mm = (task_mem_t *)kmalloc(sizeof(task_mem_t) );
+		bzero(task_pcb->mm, sizeof(task_mem_t) );
+		task_pcb->mm->stack_top =  (ptr_t)task_pcb;
+		task_pcb->mm->stack_bottom = task_pcb->mm->stack_top + TASK_STACK_SIZE;
+
+		task_pcb->pt_regs = (pt_regs_t *)( (ptr_t)task_pcb->mm->stack_bottom - sizeof(pt_regs_t) );
+		bzero(task_pcb->pt_regs, sizeof(pt_regs_t) );
+
+		task_pcb->context = (task_context_t *)kmalloc(sizeof(task_context_t) );
+		bzero(task_pcb->context, sizeof(task_context_t) );
+		task_pcb->context->eip = (ptr_t)forkret_s233;
+		task_pcb->context->esp = (ptr_t)task_pcb->pt_regs;
+
+		task_pcb->exit_code = 0xCD;
+
+		list_append(&task_list, task_pcb);
+	}
+	local_intr_restore(intr_flag);
+	return task_pcb;
 }
 
 // 创建内核进程

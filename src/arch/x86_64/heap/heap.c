@@ -39,6 +39,17 @@ ptr_t kmalloc(size_t byte) {
 	return addr;
 }
 
+// 内存释放
+void kfree(ptr_t addr) {
+	bool intr_flag = false;
+	local_intr_store(intr_flag);
+	{
+		heap_manager->heap_manage_free(addr);
+	}
+	local_intr_restore(intr_flag);
+	return;
+}
+
 // 栈申请
 ptr_t kmalloc_stack(void) {
 	ptr_t addr = (ptr_t)NULL;
@@ -49,17 +60,6 @@ ptr_t kmalloc_stack(void) {
 	}
 	local_intr_restore(intr_flag);
 	return addr;
-}
-
-// 内存释放
-void kfree(ptr_t addr) {
-	bool intr_flag = false;
-	local_intr_store(intr_flag);
-	{
-		heap_manager->heap_manage_free(addr);
-	}
-	local_intr_restore(intr_flag);
-	return;
 }
 
 // 栈释放

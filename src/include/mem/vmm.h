@@ -108,9 +108,6 @@ uint32_t get_mapping(pgd_t * pgd_now, ptr_t va, ptr_t * pa);
 // 更换当前页目录
 void switch_pgd(ptr_t pd);
 
-// 初始化内核页目录
-void vmm_kernel_init(pgd_t * pgd);
-
 #ifdef __cplusplus
 }
 #endif
