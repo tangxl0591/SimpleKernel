@@ -17,8 +17,6 @@ extern "C" {
 #include "task/task.h"
 #include "debug.h"
 
-// 当前任务指针
-task_pcb_t * curr_task = NULL;
 // 当前任务数量
 static uint32_t curr_task_count = 0;
 // 全局 pid 值
@@ -66,8 +64,6 @@ static task_pcb_t * alloc_task_pcb(void) {
 		task_pcb->exit_code = 0xCD;
 
 		list_append(&task_list, task_pcb);
-		// 增加全局进程数量
-		curr_task_count++;
 	}
 	local_intr_restore(intr_flag);
 	return task_pcb;
@@ -112,10 +108,10 @@ void task_init(void) {
 
 		// 设置进程运行状态
 		kernel_task->status = TASK_RUNNING;
-		curr_task = kernel_task;
 		// 添加到可运行/正在运行任链表
 		list_append(&runnable_list, kernel_task);
 		list_append(&task_list, kernel_task);
+		curr_task_count++;
 		printk_info("task_init\n");
 	}
 	local_intr_restore(intr_flag);
@@ -158,6 +154,8 @@ pid_t do_fork(uint32_t flags __UNUSED__, pt_regs_t * pt_regs) {
 		printk_debug("do_fork task: 0x%08X\n", task);
 		assert(task != NULL, "Error: task.c task==NULL");
 		copy_thread(task, pt_regs);
+		// 增加全局进程数量
+		curr_task_count++;
 		task->status = TASK_RUNNABLE;
 		list_append(&runnable_list, task);
 	}

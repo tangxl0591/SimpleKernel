@@ -25,10 +25,14 @@ typedef
 	const char *      name;
 	// 初始化
 	void (* heap_manage_init)(ptr_t addr_start);
-	// 内存申请，单位为 Byte，align 为对齐大小
+	// 内存申请，单位为 Byte
 	ptr_t (* heap_manage_malloc)(size_t byte);
+	// 进程栈申请
+	ptr_t (* heap_manage_malloc_stack)(void);
 	// 释放内存
 	void (* heap_manage_free)(ptr_t addr);
+	// 释放栈内存
+	void (* heap_manage_free_stack)(ptr_t addr);
 } heap_manage_t;
 
 // 初始化堆
@@ -37,8 +41,14 @@ void heap_init(void);
 // 内存申请，单位为 Byte
 ptr_t kmalloc(size_t byte);
 
+// 栈申请
+ptr_t kmalloc_stack(void);
+
 // 内存释放
 void kfree(ptr_t p);
+
+// 栈释放
+void kfree_stack(ptr_t p);
 
 #ifdef __cplusplus
 }

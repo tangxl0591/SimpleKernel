@@ -47,15 +47,14 @@ void schedule() {
 	local_intr_store(intr_flag);
 	{
 		// 首先从链表中找到正在执行的进程，结果不为空
-		ListEntry * tmp = list_find_data(runnable_list, vs_med, curr_task);
+		ListEntry * tmp = list_find_data(runnable_list, vs_med, get_current_task() );
 		assert( (tmp != NULL), "Error at sched.c, tmp == NULL!\n");
 		task_pcb_t * next =
 		    ( ( (task_pcb_t *)(list_data(list_next(tmp) ) ) ) == NULL) ?
 		    ( (task_pcb_t *)(list_nth_data(runnable_list, 0) ) )
 	    : ( (task_pcb_t *)(list_data(list_next(tmp) ) ) );
-		if( (curr_task->pid != next->pid) ) {
-			task_pcb_t * prev = curr_task;
-			curr_task = next;
+		if( (get_current_task()->pid != next->pid) ) {
+			task_pcb_t * prev = get_current_task();
 			// printk_debug("prev: 0x%08X\t", prev);
 			// printk_debug("prev->context: 0x%08X\t", prev->context);
 			// printk_debug("prev->pid: 0x%08X\t", prev->pid);
@@ -82,7 +81,7 @@ void schedule() {
 			// printk_debug("next->edi 0x%08X\n", next->context->edi);
 			// print_stack(1);
 			// printk_debug("switch_to-----\n");
-			switch_to(prev, curr_task, prev);
+			switch_to(prev, next, prev);
 			// printk_debug("switch_to END.\n");
 			// asm ("hlt");
 		}

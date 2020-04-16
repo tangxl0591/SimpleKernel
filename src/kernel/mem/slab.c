@@ -24,13 +24,17 @@ extern "C" {
 
 static void init(ptr_t addr_start);
 static ptr_t alloc(size_t byte);
+static ptr_t alloc_stack(void);
 static void free(ptr_t addr);
+static void free_stack(ptr_t addr);
 
 heap_manage_t slab_manage = {
 	"Slab",
 	&init,
 	&alloc,
-	&free
+	&alloc_stack,
+	&free,
+	&free_stack
 };
 
 typedef
@@ -295,6 +299,13 @@ ptr_t alloc_page(ptr_t va, size_t page) {
 	return va;
 }
 
+// 释放内存页
+// va: 虚拟地址起点
+static inline void free_page(ptr_t va);
+void free_page(ptr_t va) {
+	return;
+}
+
 ptr_t alloc(size_t byte) {
 	// 所有申请的内存长度(限制最小大小)加上管理头的长度
 	size_t len = (byte > SLAB_MIN) ? byte : SLAB_MIN;
@@ -333,6 +344,25 @@ void free(ptr_t addr) {
 	}
 	list_slab_block(entry)->allocated = SLAB_UNUSED;
 	slab_merge(entry);
+	return;
+}
+
+// 申请栈空间
+// 地址按照 TASK_STACK_SIZE 对齐
+// 大小为 TASK_STACK_SIZE
+ptr_t alloc_stack(void) {
+	// 直接在物理地址里申请
+	ptr_t pa = (ptr_t)NULL;
+	pa = pmm_alloc(KERNEL_STACK_SIZE);
+	// 然后映射到符合要求的虚拟地址
+	// 虚拟地址通过计算得出
+	ptr_t va = (ptr_t)NULL;
+	// va 需要符合条件：va%KERNEL_STACK_SIZE == 0
+	return (ptr_t)va;
+}
+
+// 栈的回收，直接取消映射
+void free_stack(ptr_t addr) {
 	return;
 }
 
