@@ -50,7 +50,7 @@ bool test_vmm(void) {
 
 	printk_test("map2:\n");
 	ptr_t pa2 = pmm_alloc(VMM_PAGE_SIZE);
-	ptr_t va2 = 0x80100;
+	ptr_t va2 = 0x81000;
 	map(pgd_kernel, va2, pa2, VMM_PAGE_PRESENT | VMM_PAGE_RW);
 	bzero( (void *)va2, VMM_PAGE_SIZE);
 

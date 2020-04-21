@@ -56,20 +56,28 @@ void vmm_init(void) {
 void map(pgd_t * pgd_now, ptr_t va, ptr_t pa, uint32_t flags) {
 	uint32_t pgd_idx = VMM_PGD_INDEX(va);
 	uint32_t pte_idx = VMM_PTE_INDEX(va);
+	// 从页目录中查找页表
 	pte_t * pte = (pte_t *)(pgd_now[pgd_idx] & VMM_PAGE_MASK);
-	printk_debug("pte1:0x%08X ", pte);
-	// printk_debug("---:0x%08X ", pgd_now[pgd_idx]);
-	// 转换到内核线性地址
+	printk_debug("pte1:0x%08X pte_idx:0x%08X", pte, pte_idx);
+	printk_debug("pgd_now[pgd_idx]:0x%08X &pgd_now[pgd_idx]:0x%08X", pgd_now[pgd_idx], &pgd_now[pgd_idx]);
+	// 如果页表不存在
 	if(pte == NULL) {
-		// pte = (pte_t *)pmm_alloc(VMM_PAGE_SIZE);
-		// printk_debug("pte2:0x%08X ", pte);
-		pgd_now[pgd_idx] = (pte_t)pte | VMM_PAGE_PRESENT | VMM_PAGE_RW | VMM_PAGE_KERNEL;
+		// 创建页表，分配空间
+		pte = (pte_t *)pmm_alloc(VMM_PAGE_SIZE);
+		printk_debug("pte1.5:0x%08X VMM_PA_LA( (ptr_t)pte):0x%08X", pte, VMM_PA_LA( (ptr_t)pte) );
+		// 添加到页目录中
+		pgd_now[pgd_idx] = (ptr_t)( (ptr_t)pte | VMM_PAGE_PRESENT | VMM_PAGE_RW | VMM_PAGE_KERNEL);
+		// 这一步需要获取 pte 的线性地址，直接转换显然是错误的
 		pte = (pte_t *)VMM_PA_LA( (ptr_t)pte);
+
 		// printk_debug("---2:0x%08X ", pgd_now[pgd_idx]);
 	} else {
-		pte = (pte_t *)VMM_PA_LA( (ptr_t)pte);
+		// 这一步需要获取 pte 的线性地址，直接转换显然是错误的
+		// pte = (pte_t *)VMM_PA_LA( (ptr_t)pte);
 	}
 	pte[pte_idx] = (pa & VMM_PAGE_MASK) | flags;
+	printk_debug("pte2:0x%08X &pte[pte_idx]:0x%08X pte[233]:0x%08X", pte, &pte[pte_idx], pte[233]);
+
 	// 通知 CPU 更新页表缓存
 	CPU_INVLPG(va);
 	return;
