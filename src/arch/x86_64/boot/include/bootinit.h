@@ -1,14 +1,16 @@
 
-// This file is a part of MRNIU/SimpleKernel (https://github.com/MRNIU/SimpleKernel).
+// This file is a part of Simple-XX/SimpleKernel
+// (https://github.com/Simple-XX/SimpleKernel).
 //
-// bootinit.h for MRNIU/SimpleKernel.
+// bootinit.h for Simple-XX/SimpleKernel.
 
 #ifndef _BOOTINIT_H_
 #define _BOOTINIT_H_
 
 /* Check if the compiler thinks we are targeting the wrong operating system. */
-#if defined (__linux__)
-#error "You are not using a cross-compiler, you will most certainly run into trouble"
+#if defined(__linux__)
+#error                                                                         \
+    "You are not using a cross-compiler, you will most certainly run into trouble"
 #endif
 
 #ifdef __cplusplus
@@ -24,38 +26,48 @@ extern "C" {
 
 // 内核使用的临时页表和页目录
 // 用于映射 init 段与内核段
-__attribute__( (section(".init.data") ) )
-pgd_t pgd_tmp[VMM_PAGE_TABLES_PRE_PAGE_DIRECTORY] __attribute__( (aligned(VMM_PAGE_SIZE) ) );
+__attribute__((section(".init.data")))
+pgd_t pgd_tmp[VMM_PAGE_TABLES_PRE_PAGE_DIRECTORY]
+    __attribute__((aligned(VMM_PAGE_SIZE)));
 // init 段
 <<<<<<< HEAD
-__attribute__( (section(".init.data") ) )
-pte_t pte_init[VMM_PAGES_PRE_PAGE_TABLE] __attribute__( (aligned(VMM_PAGE_SIZE) ) );
+__attribute__((section(".init.data"))) pte_t pte_init[VMM_PAGES_PRE_PAGE_TABLE]
+    __attribute__((aligned(VMM_PAGE_SIZE)));
 // 内核段，共 8MB
-__attribute__( (section(".init.data") ) )
-pte_t pte_kernel_tmp[VMM_PAGES_PRE_PAGE_TABLE] __attribute__( (aligned(VMM_PAGE_SIZE) ) );
-__attribute__( (section(".init.data") ) )
-pte_t pte_kernel_tmp2[VMM_PAGES_PRE_PAGE_TABLE] __attribute__( (aligned(VMM_PAGE_SIZE) ) );
+__attribute__((section(".init.data")))
+pte_t pte_kernel_tmp[VMM_PAGES_PRE_PAGE_TABLE]
+    __attribute__((aligned(VMM_PAGE_SIZE)));
+__attribute__((section(".init.data")))
+pte_t pte_kernel_tmp2[VMM_PAGES_PRE_PAGE_TABLE]
+    __attribute__((aligned(VMM_PAGE_SIZE)));
 // 内核栈段(还没用上)
-__attribute__( (section(".init.data") ) )
-pte_t pte_stack_tmp[VMM_PAGES_PRE_PAGE_TABLE] __attribute__( (aligned(VMM_PAGE_SIZE) ) );
+__attribute__((section(".init.data")))
+pte_t pte_stack_tmp[VMM_PAGES_PRE_PAGE_TABLE]
+    __attribute__((aligned(VMM_PAGE_SIZE)));
 =======
-__attribute__( (section(".init.data") ) ) pte_t pte_init[VMM_PAGES_PRE_PAGE_TABLE] __attribute__( (aligned(VMM_PAGE_SIZE) ) );
+__attribute__((section(".init.data"))) pte_t pte_init[VMM_PAGES_PRE_PAGE_TABLE]
+    __attribute__((aligned(VMM_PAGE_SIZE)));
 // 内核段
-__attribute__( (section(".init.data") ) ) pte_t pte_kernel_tmp[VMM_PAGES_PRE_PAGE_TABLE] __attribute__( (aligned(VMM_PAGE_SIZE) ) );
+__attribute__((section(".init.data")))
+pte_t pte_kernel_tmp[VMM_PAGES_PRE_PAGE_TABLE]
+    __attribute__((aligned(VMM_PAGE_SIZE)));
 // 内核栈段
-__attribute__( (section(".init.data") ) ) pte_t pte_stack_tmp[VMM_PAGES_PRE_PAGE_TABLE] __attribute__( (aligned(VMM_PAGE_SIZE) ) );
+__attribute__((section(".init.data")))
+pte_t pte_stack_tmp[VMM_PAGES_PRE_PAGE_TABLE]
+    __attribute__((aligned(VMM_PAGE_SIZE)));
 
 // 开启分页机制之后的内核栈
-uint8_t kernel_stack[STACK_SIZE] __attribute__( (aligned(STACK_SIZE) ) );
+uint8_t kernel_stack[STACK_SIZE] __attribute__((aligned(STACK_SIZE)));
 
 // 内核栈顶
-ptr_t kernel_stack_top = ( (ptr_t)kernel_stack + STACK_SIZE);
+ptr_t kernel_stack_top = ((ptr_t)kernel_stack + STACK_SIZE);
 >>>>>>> vmm_and_pmm
 
-__attribute__( (section(".init.text") ) ) void kernel_entry(ptr_t magic, ptr_t addr);
-__attribute__( (section(".init.text") ) ) void enable_page(pgd_t * pgd);
-__attribute__( (section(".init.text") ) ) void switch_stack(ptr_t stack_top);
-__attribute__( (section(".init.text") ) ) void mm_init(void);
+__attribute__((section(".init.text"))) void kernel_entry(ptr_t magic,
+                                                         ptr_t addr);
+__attribute__((section(".init.text"))) void enable_page(pgd_t *pgd);
+__attribute__((section(".init.text"))) void switch_stack(ptr_t stack_top);
+__attribute__((section(".init.text"))) void mm_init(void);
 
 extern void kernel_main(ptr_t magic, ptr_t addr);
 

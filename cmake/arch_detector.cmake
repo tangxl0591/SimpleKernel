@@ -1,7 +1,7 @@
 
-# This file is a part of SimpleXX/SimpleKernel (https://github.com/SimpleXX/SimpleKernel).
+# This file is a part of Simple-XX/SimpleKernel (https://github.com/Simple-XX/SimpleKernel).
 #
-# arch_detector.cmake for SimpleXX/SimpleKernel.
+# arch_detector.cmake for Simple-XX/SimpleKernel.
 
 if (ARCH STREQUAL x86)
     set(SimpleKernelArch x86)

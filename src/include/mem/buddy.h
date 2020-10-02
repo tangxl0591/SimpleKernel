@@ -1,7 +1,8 @@
 
-// This file is a part of MRNIU/SimpleKernel (https://github.com/MRNIU/SimpleKernel).
+// This file is a part of Simple-XX/SimpleKernel
+// (https://github.com/Simple-XX/SimpleKernel).
 //
-// buddy.h for MRNIU/SimpleKernel.
+// buddy.h for Simple-XX/SimpleKernel.
 
 #ifndef _BUDDY_H_
 #define _BUDDY_H_

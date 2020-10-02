@@ -1,8 +1,8 @@
 
-// This file is a part of MRNIU/SimpleKernel (https://github.com/MRNIU/SimpleKernel).
+// This file is a part of Simple-XX/SimpleKernel
+// (https://github.com/Simple-XX/SimpleKernel).
 //
-// alh.h for MRNIU/SimpleKernel.
-
+// alh.h for Simple-XX/SimpleKernel.
 
 #ifndef _ALG_H_
 #define _ALH_H_

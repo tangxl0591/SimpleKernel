@@ -1,7 +1,8 @@
 
-// This file is a part of MRNIU/SimpleKernel (https://github.com/MRNIU/SimpleKernel).
+// This file is a part of Simple-XX/SimpleKernel
+// (https://github.com/Simple-XX/SimpleKernel).
 //
-// heap.h for MRNIU/SimpleKernel.
+// heap.h for Simple-XX/SimpleKernel.
 
 #ifndef _HEAP_H_
 #define _HEAP_H_
@@ -14,17 +15,16 @@ extern "C" {
 #include "stddef.h"
 
 // 堆起始地址 2GB 处，向上增长
-#define HEAP_START      (0x80000000)
+#define HEAP_START (0x80000000)
 // 堆最大容量 4MB
-#define HEAP_MAX_SIZE   (0x400000)
+#define HEAP_MAX_SIZE (0x400000)
 
 // 内存块管理结构
-typedef
-        struct heap_header {
-	struct heap_header * prev;    // 前后内存块管理结构指针
-	struct heap_header * next;
-	uint32_t allocated : 1; // 该内存块是否已经被申请
-	uint32_t length : 31;   // 当前内存块的长度
+typedef struct heap_header {
+    struct heap_header *prev; // 前后内存块管理结构指针
+    struct heap_header *next;
+    uint32_t            allocated : 1; // 该内存块是否已经被申请
+    uint32_t            length : 31;   // 当前内存块的长度
 } heap_header_t;
 
 // 初始化堆

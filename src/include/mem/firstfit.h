@@ -1,7 +1,8 @@
 
-// This file is a part of MRNIU/SimpleKernel (https://github.com/MRNIU/SimpleKernel).
+// This file is a part of Simple-XX/SimpleKernel
+// (https://github.com/Simple-XX/SimpleKernel).
 //
-// firstfit.h for MRNIU/SimpleKernel.
+// firstfit.h for Simple-XX/SimpleKernel.
 
 #ifndef _FIRTSTFIT_H_
 #define _FIRTSTFIT_H_
